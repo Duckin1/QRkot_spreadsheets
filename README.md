@@ -21,10 +21,24 @@ python -m venv venv
 ```
 В корневой директории создайте файл `.env` следующего содержания:
 ```commandline
-APP_TITLE=Фонд поддержки котиков QRKot
+email= email для google cloud api
+app_title=Фонд поддержки котиков QRKot
 APP_DESCRIPTION=Помогаем котикам
-DATABASE_URL=sqlite+aiosqlite:///./fastapi.db - или ваше подключение к базе данных
-SECRET=ваш_секретный_ключ
+database_url=sqlite+aiosqlite:///./fastapi.db - путь подключения к базе
+secret=Ваш секретный ключ
+
+Данные с JSON google cloud api
+type =
+project_id=
+private_key_id=
+private_key=
+client_email=
+client_id=
+auth_uri=
+token_uri=
+auth_provider_x509_cert_url=
+client_x509_cert_url=
+universe_domain=
 ```
 Активируйте виртуальное окружение
 ```
