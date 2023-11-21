@@ -4,21 +4,26 @@ from typing import Optional
 from pydantic import BaseModel, PositiveInt
 
 
-class DonationCreate(BaseModel):
+class DonationBase(BaseModel):
+    full_amount: Optional[PositiveInt]
+    comment: Optional[str] = None
+
+
+class DonationCreate(DonationBase):
     full_amount: PositiveInt
-    comment: Optional[str]
 
 
-class DonationDBBase(DonationCreate):
+class DonationUpdate(BaseModel):
+    pass
+
+
+class DonationDB(DonationCreate):
     id: int
     create_date: datetime
+    comment: Optional[str]
+    user_id: int
+    invested_amount: int
+    fully_invested: bool
 
     class Config:
         orm_mode = True
-
-
-class DonationDB(DonationDBBase):
-    user_id: Optional[int]
-    invested_amount: int
-    fully_invested: bool
-    close_date: Optional[datetime]

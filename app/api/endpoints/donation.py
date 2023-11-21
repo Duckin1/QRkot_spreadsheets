@@ -4,54 +4,50 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_async_session
 from app.core.user import current_user
 from app.crud.donation import donation_crud
-from app.models import User
-from app.schemas.donation import (
-    DonationCreate, DonationDB, DonationDBBase
-)
-from app.services.charity_services import donate
-
+from app.models.user import User
+from app.schemas.donation import DonationCreate, DonationDB
+from app.services.investment import invest_to_charity_project
 
 router = APIRouter()
-
-
-@router.post(
-    '/',
-    response_model=DonationDBBase,
-    response_model_exclude_none=True,
-)
-async def create_donation(
-        donation: DonationCreate,
-        user: User = Depends(current_user),
-        session: AsyncSession = Depends(get_async_session),
-):
-    """Создать пожертвование от текущего пользователя."""
-    new_donation = await donation_crud.create(donation, session, user)
-    await donate(new_donation, session)
-    await session.refresh(new_donation)
-    return new_donation
 
 
 @router.get(
     '/',
     response_model=list[DonationDB],
-    response_model_exclude_none=True,
 )
 async def get_all_donations(
-        session: AsyncSession = Depends(get_async_session),
+    session: AsyncSession = Depends(get_async_session)
 ):
-    """Получить список всех пожертвований."""
     return await donation_crud.get_multi(session)
 
 
 @router.get(
     '/my',
-    response_model=list[DonationDBBase],
-    response_model_exclude_none=True,
-    response_model_exclude={'user_id'},
+    response_model=list[DonationDB],
+    response_model_exclude={'fully_invested', 'invested_amount', 'user_id'}
 )
-async def get_current_user_donations(
-        user: User = Depends(current_user),
-        session: AsyncSession = Depends(get_async_session),
+async def get_my_donations(
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user)
 ):
-    """Получить все пожертвования текущего пользователя."""
-    return await donation_crud.get_for_user(user, session)
+    donations = await donation_crud.get_donation_by_user(
+        session=session, user=user
+    )
+    return donations
+
+
+@router.post(
+    '/',
+    response_model=DonationDB,
+    response_model_exclude_none=True,
+    response_model_exclude={'fully_invested', 'invested_amount', 'user_id'}
+)
+async def create_charity_project(
+    donation: DonationCreate,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_user)
+):
+    """Только для авторизованных пользователей"""
+    donation = await donation_crud.create(donation, session, user)
+    donation = await invest_to_charity_project(donation, session)
+    return donation

@@ -6,6 +6,7 @@ from app.core.config import settings
 
 
 class PreBase:
+
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
@@ -14,6 +15,7 @@ class PreBase:
 
 
 Base = declarative_base(cls=PreBase)
+
 engine = create_async_engine(settings.database_url)
 
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)

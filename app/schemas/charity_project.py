@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Extra, Field, PositiveInt, validator
+from pydantic import BaseModel, Extra, Field, PositiveInt, root_validator
 
 
 class CharityProjectBase(BaseModel):
@@ -20,19 +20,24 @@ class CharityProjectCreate(CharityProjectBase):
 
 
 class CharityProjectUpdate(CharityProjectBase):
-    @validator('name')
-    def name_cannot_be_null(cls, value):
-        if not value:
-            raise ValueError('Имя проекта не может быть пустым!')
-        return value
+
+    @root_validator(skip_on_failure=True)
+    def check_fields_not_none(cls, values):
+        if (
+            values['description'] or values['name'] or values['full_amount']
+        ) is None:
+            raise ValueError(
+                'Значение поля не должно быть пустым'
+            )
+        return values
 
 
-class CharityProjectDB(CharityProjectCreate):
+class CharityProgectDB(CharityProjectCreate):
     id: int
     invested_amount: int
     fully_invested: bool
     create_date: datetime
-    close_date: Optional[datetime]
+    close_date: Optional[datetime] = None
 
     class Config:
         orm_mode = True

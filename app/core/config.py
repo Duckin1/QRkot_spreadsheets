@@ -4,14 +4,11 @@ from pydantic import BaseSettings, EmailStr
 
 
 class Settings(BaseSettings):
-    app_title: str = 'Благотворительный фонд поддержки котиков QRKot'
-    app_description: str = 'Помогаем котикам'
-    database_url: str = 'sqlite+aiosqlite:///./qr_cat.db'
+    app_title: str = 'Фонд поддержки котиков QRKot'
+    database_url: str = 'sqlite+aiosqlite:///./fastapi.db'
     secret: str = 'SECRET'
-    token_lifetime = 3600
-    first_superuser_email: Optional[EmailStr] = None
-    first_superuser_password: Optional[str] = None
-
+    first_superuser_email: Optional[EmailStr]
+    first_superuser_password: Optional[str]
     type: Optional[str] = None
     project_id: Optional[str] = None
     private_key_id: Optional[str] = None
