@@ -4,11 +4,11 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud.constants import FALSE
 from app.models.user import User
 
 
 class CRUDBase:
-
     def __init__(self, model) -> None:
         self.model = model
 
@@ -18,9 +18,7 @@ class CRUDBase:
         session: AsyncSession,
     ):
         db_obj = await session.execute(
-            select(self.model).where(
-                self.model.id == obj_id
-            )
+            select(self.model).where(self.model.id == obj_id)
         )
         return db_obj.scalars().first()
 
@@ -28,32 +26,27 @@ class CRUDBase:
         self,
         session: AsyncSession,
     ):
-        db_objs = await session.execute(
-            select(self.model)
-        )
+        db_objs = await session.execute(select(self.model))
         return db_objs.scalars().all()
 
     async def create(
         self,
         obj_in,
         session: AsyncSession,
-        user: Optional[User] = None
+        user: Optional[User] = None,
+        is_investment: bool = True,
     ):
         new_obj_data = obj_in.dict()
         if user is not None:
-            new_obj_data['user_id'] = user.id
+            new_obj_data["user_id"] = user.id
         db_obj = self.model(**new_obj_data)
         session.add(db_obj)
-        await session.commit()
+        if is_investment:
+            await session.commit()
         await session.refresh(db_obj)
         return db_obj
 
-    async def update(
-        self,
-        db_obj,
-        obj_in,
-        session: AsyncSession
-    ):
+    async def update(self, db_obj, obj_in, session: AsyncSession):
         obj_data = jsonable_encoder(db_obj)
         update_data = obj_in.dict(exclude_unset=True)
 
@@ -66,11 +59,19 @@ class CRUDBase:
         await session.refresh(db_obj)
         return db_obj
 
-    async def remove(
-        self,
-        db_obj,
-        session: AsyncSession
-    ):
+    async def remove(self, db_obj, session: AsyncSession):
         await session.delete(db_obj)
         await session.commit()
         return db_obj
+
+    async def get_not_fully_invested(
+        self,
+        session: AsyncSession,
+    ):
+        objects = await session.execute(
+            select(self.model)
+            .order_by(self.model.create_date)
+            .where(self.model.fully_invested == FALSE)
+        )
+        objects = objects.scalars().all()
+        return objects

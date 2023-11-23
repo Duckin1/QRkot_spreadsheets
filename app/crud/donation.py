@@ -1,3 +1,5 @@
+from typing import List
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,16 +9,13 @@ from app.models.user import User
 
 
 class CRUDDonation(CRUDBase):
-
     async def get_donation_by_user(
-        self,
-        user: User,
-        session: AsyncSession
-    ) -> list[Donation]:
-        user_donations = await session.execute(select(Donation).where(
-            Donation.user_id == user.id)
+        self, user: User, session: AsyncSession
+    ) -> List[Donation]:
+        donations = await session.execute(
+            select(Donation).where(Donation.user_id == user.id)
         )
-        return user_donations.scalars().all()
+        return donations.scalars().all()
 
 
 donation_crud = CRUDDonation(Donation)

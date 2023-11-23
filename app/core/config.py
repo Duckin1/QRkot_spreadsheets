@@ -4,9 +4,9 @@ from pydantic import BaseSettings, EmailStr
 
 
 class Settings(BaseSettings):
-    app_title: str = 'Фонд поддержки котиков QRKot'
-    database_url: str = 'sqlite+aiosqlite:///./fastapi.db'
-    secret: str = 'SECRET'
+    app_title: str = "Фонд поддержки котиков QRKot"
+    database_url: str = "sqlite+aiosqlite:///./qrkot_development.db"
+    secret: str = "SECRET"
     first_superuser_email: Optional[EmailStr]
     first_superuser_password: Optional[str]
     type: Optional[str] = None
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     email: Optional[str] = None
 
     class Config:
-        env_file = '.env'
+        env_file = ".env"
 
 
 settings = Settings()

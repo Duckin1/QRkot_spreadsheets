@@ -20,15 +20,10 @@ class CharityProjectCreate(CharityProjectBase):
 
 
 class CharityProjectUpdate(CharityProjectBase):
-
     @root_validator(skip_on_failure=True)
     def check_fields_not_none(cls, values):
-        if (
-            values['description'] or values['name'] or values['full_amount']
-        ) is None:
-            raise ValueError(
-                'Значение поля не должно быть пустым'
-            )
+        if (values["description"] or values["name"] or values["full_amount"]) is None:
+            raise ValueError("Значение поля не должно быть пустым")
         return values
 
 
