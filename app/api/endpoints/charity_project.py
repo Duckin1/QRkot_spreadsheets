@@ -35,11 +35,11 @@ async def create_charity_project(
 ) -> CharityProject:
     """Только для авторизованных пользователей"""
     await check_name_duplicate(project.name, session)
-    new_project = await charity_project_crud.create(project, session, is_committed=False)
-    await session.commit()
-    await session.refresh(new_project)
+    new_project = await charity_project_crud.create(
+        project, session, is_not_committed=False
+    )
     donats = await donation_crud.get_not_fully_invested(session)
-    donats = await invest_to_charity_project(new_project, donats)
+    donats = invest_to_charity_project(new_project, donats)
     session.add_all(donats)
     await session.commit()
     await session.refresh(new_project)
@@ -78,7 +78,7 @@ async def partially_update_charity_project(
         charity_project, obj_in, session
     )
     targets = await donation_crud.get_not_fully_invested(session)
-    donats = await invest_to_charity_project(charity_project, targets)
+    donats = invest_to_charity_project(charity_project, targets)
     if donats:
         session.add_all(donats)
     await session.commit()

@@ -33,14 +33,16 @@ class CRUDBase:
         obj_in,
         session: AsyncSession,
         user: Optional[User] = None,
-        is_committed: bool = True,
+        is_not_committed: bool = True,
     ):
         new_obj_data = obj_in.dict()
         if user is not None:
             new_obj_data["user_id"] = user.id
+        if new_obj_data.get('invested_amount') is None:
+            new_obj_data['invested_amount'] = 0
         db_obj = self.model(**new_obj_data)
         session.add(db_obj)
-        if is_committed:
+        if is_not_committed:
             await session.commit()
             await session.refresh(db_obj)
         return db_obj
