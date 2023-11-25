@@ -4,7 +4,6 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.constants import FALSE
 from app.models.user import User
 
 
@@ -34,16 +33,16 @@ class CRUDBase:
         obj_in,
         session: AsyncSession,
         user: Optional[User] = None,
-        is_investment: bool = True,
+        is_commit: bool = True,
     ):
         new_obj_data = obj_in.dict()
         if user is not None:
             new_obj_data["user_id"] = user.id
         db_obj = self.model(**new_obj_data)
         session.add(db_obj)
-        if is_investment:
+        if is_commit:
             await session.commit()
-        await session.refresh(db_obj)
+            await session.refresh(db_obj)
         return db_obj
 
     async def update(self, db_obj, obj_in, session: AsyncSession):
@@ -71,7 +70,7 @@ class CRUDBase:
         objects = await session.execute(
             select(self.model)
             .order_by(self.model.create_date)
-            .where(self.model.fully_invested == FALSE)
+            .where(self.model.fully_invested == False)
         )
         objects = objects.scalars().all()
         return objects

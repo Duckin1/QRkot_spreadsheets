@@ -1,9 +1,9 @@
 from sqlalchemy import Column, String, Text
 
-from .base import BaseAbstractModel
+from .base import InvestmentModel
 
 
-class CharityProject(BaseAbstractModel):
+class CharityProject(InvestmentModel):
     """Модель благотворительного проекта"""
 
     name = Column(String(100), unique=True, nullable=False)

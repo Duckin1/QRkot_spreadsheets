@@ -1,33 +1,26 @@
 from datetime import datetime as dt
 from typing import Union
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.crud.charity_project import charity_project_crud
-from app.crud.donation import donation_crud
+from app.models.base import InvestmentModel
 from app.models.charity_project import CharityProject
-from app.models.donation import Donation
 
 
 async def invest_to_charity_project(
-    source: Union[CharityProject, Donation],
-    session: AsyncSession,
-) -> Union[CharityProject, Donation]:
-    if source.invested_amount is None:
-        source.invested_amount = 0
-    crud = donation_crud if isinstance(source, CharityProject) else charity_project_crud
-    for target in await crud.get_not_fully_invested(session):
-        session.add(target)
-        allocated_amount = (
-            (target.full_amount - target.invested_amount)
-            if (source.full_amount - source.invested_amount) >
-               (target.full_amount - target.invested_amount)
-            else (source.full_amount - source.invested_amount)
-        )
-        for object in (target, source):
-            object.invested_amount += allocated_amount
-            if object.invested_amount == object.full_amount:
-                object.fully_invested, object.close_date = True, dt.now()
+    source: Union[CharityProject, InvestmentModel], targets
+) -> Union[CharityProject, InvestmentModel]:
+    source.invested_amount = source.invested_amount or 0
+
+    for target in targets:
+        source_remaining_amount = source.full_amount - source.invested_amount
+        target_remaining_amount = target.full_amount - target.invested_amount
+
+        allocated_amount = min(source_remaining_amount, target_remaining_amount)
+
+        for obj in (target, source):
+            obj.invested_amount += allocated_amount
+            if obj.invested_amount == obj.full_amount:
+                obj.fully_invested, obj.close_date = True, dt.now()
+
         if source.fully_invested:
             break
-    return source
+    return targets

@@ -7,7 +7,7 @@ from app.core.config import settings
 FORMAT = "%Y/%m/%d %H:%M:%S"
 
 
-async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
+async def spreadsheets_create(wrapper_services: Aiogoogle):
     # Получаем текущую дату для заголовка документа
     now_date_time = datetime.now().strftime(FORMAT)
     # Создаём экземпляр класса Resourse
@@ -33,11 +33,12 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
     response = await wrapper_services.as_service_account(
         service.spreadsheets.create(json=spreadsheet_body)
     )
-    return response["spreadsheetId"]
+
+    return response["spreadsheetId"], response["spreadsheetUrl"]
 
 
 async def set_user_permissions(
-    spreadsheet_id: str, wrapper_services: Aiogoogle
+        spreadsheet_id: str, wrapper_services: Aiogoogle
 ) -> None:
     permissions_body = {
         "type": "user",
@@ -53,7 +54,7 @@ async def set_user_permissions(
 
 
 async def spreadsheets_update_value(
-    spreadsheet_id: str, charity_projects: list, wrapper_services: Aiogoogle
+        spreadsheet_id: str, charity_projects: list, wrapper_services: Aiogoogle
 ) -> None:
     now_date_time = datetime.now().strftime(FORMAT)
     service = await wrapper_services.discover("sheets", "v4")
@@ -63,6 +64,9 @@ async def spreadsheets_update_value(
         ["Топ Проектов ао скорости закрытия"],
         ["Название проекта", "Время сбора", "Описание"],
     ]
+    charity_projects = sorted(
+        charity_projects, key=lambda timedelta: timedelta[1] - timedelta[2]
+    )
     for charity_project in charity_projects:
         new_row = [
             str(charity_project["name"]),
@@ -72,7 +76,7 @@ async def spreadsheets_update_value(
         table_values.append(new_row)
 
     update_body = {"majorDimension": "ROWS", "values": table_values}
-    await wrapper_services.as_service_account(
+    return await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
             range="A1:E30",

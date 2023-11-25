@@ -38,7 +38,10 @@ async def create_user(email: EmailStr, password: str, is_superuser: bool = False
 # Корутина, проверяющая, указаны ли в настройках данные для суперюзера.
 # Если да, то вызывается корутина create_user для создания суперпользователя.
 async def create_first_superuser():
-    if settings.first_superuser_email is not None and settings.first_superuser_password is not None:
+    if (
+        settings.first_superuser_email is not None and
+        settings.first_superuser_password is not None
+    ):
         await create_user(
             email=settings.first_superuser_email,
             password=settings.first_superuser_password,

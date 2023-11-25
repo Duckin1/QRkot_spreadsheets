@@ -4,7 +4,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
-from app.crud.constants import TRUE
 from app.models.charity_project import CharityProject
 
 
@@ -18,7 +17,7 @@ class CRUDCharityProject(CRUDBase):
         db_charity_project_id = db_charity_project_id.scalars().first()
         return db_charity_project_id
 
-    async def get_projects_by_completion_rate(
+    async def get_all_fully_invested_project(
         self,
         session: AsyncSession,
     ) -> List[CharityProject]:
@@ -30,7 +29,7 @@ class CRUDCharityProject(CRUDBase):
                     CharityProject.close_date,
                     CharityProject.description,
                 ]
-            ).where(CharityProject.fully_invested == TRUE)
+            ).where(CharityProject.fully_invested == True)
         )
         return closed_projects.all()
 

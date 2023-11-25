@@ -11,6 +11,7 @@ from app.api.validators import (
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
+from app.crud.donation import donation_crud
 from app.models.charity_project import CharityProject
 from app.schemas.charity_project import (
     CharityProgectDB,
@@ -33,8 +34,11 @@ async def create_charity_project(
 ) -> CharityProject:
     """Только для авторизованных пользователей"""
     await check_name_duplicate(project.name, session)
-    new_project = await charity_project_crud.create(project, session)
-    await invest_to_charity_project(new_project, session)
+    new_project = await charity_project_crud.create(project, session, is_commit=False)
+    targets = await donation_crud.get_not_fully_invested(session)
+    donats = await invest_to_charity_project(new_project, list(targets))
+    if donats:
+        session.add_all(donats)
     await session.commit()
     await session.refresh(new_project)
     return new_project
@@ -67,7 +71,13 @@ async def partially_update_charity_project(
     charity_project = await charity_project_crud.update(
         charity_project, obj_in, session
     )
-    return await invest_to_charity_project(charity_project, session)
+    targets = await donation_crud.get_not_fully_invested(session)
+    donats = await invest_to_charity_project(charity_project, targets)
+    if donats:
+        session.add_all(donats)
+    await session.commit()
+    await session.refresh(charity_project)
+    return charity_project
 
 
 @router.delete(
