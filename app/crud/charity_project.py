@@ -29,7 +29,7 @@ class CRUDCharityProject(CRUDBase):
                     CharityProject.close_date,
                     CharityProject.description,
                 ]
-            ).where(CharityProject.fully_invested == True)
+            ).where(CharityProject.fully_invested == 1)
         )
         return closed_projects.all()
 

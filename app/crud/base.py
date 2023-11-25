@@ -70,7 +70,7 @@ class CRUDBase:
         objects = await session.execute(
             select(self.model)
             .order_by(self.model.create_date)
-            .where(self.model.fully_invested == False)
+            .where(self.model.fully_invested == 0)
         )
         objects = objects.scalars().all()
         return objects
