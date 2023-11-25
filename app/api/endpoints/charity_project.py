@@ -30,15 +30,17 @@ router = APIRouter()
     dependencies=[Depends(current_superuser)],
 )
 async def create_charity_project(
-    project: CharityProjectCreate, session: AsyncSession = Depends(get_async_session)
+        project: CharityProjectCreate,
+        session: AsyncSession = Depends(get_async_session)
 ) -> CharityProject:
     """Только для авторизованных пользователей"""
     await check_name_duplicate(project.name, session)
-    new_project = await charity_project_crud.create(project, session, is_commit=False)
-    targets = await donation_crud.get_not_fully_invested(session)
-    donats = await invest_to_charity_project(new_project, list(targets))
-    if donats:
-        session.add_all(donats)
+    new_project = await charity_project_crud.create(project, session, is_committed=False)
+    await session.commit()
+    await session.refresh(new_project)
+    donats = await donation_crud.get_not_fully_invested(session)
+    donats = await invest_to_charity_project(new_project, donats)
+    session.add_all(donats)
     await session.commit()
     await session.refresh(new_project)
     return new_project
@@ -49,7 +51,9 @@ async def create_charity_project(
     response_model=list[CharityProgectDB],
     response_model_exclude_none=True,
 )
-async def get_all_charity_projects(session: AsyncSession = Depends(get_async_session)):
+async def get_all_charity_projects(
+        session: AsyncSession = Depends(get_async_session)
+):
     return await charity_project_crud.get_multi(session)
 
 
@@ -59,11 +63,13 @@ async def get_all_charity_projects(session: AsyncSession = Depends(get_async_ses
     dependencies=[Depends(current_superuser)],
 )
 async def partially_update_charity_project(
-    charity_project_id: int,
-    obj_in: CharityProjectUpdate,
-    session: AsyncSession = Depends(get_async_session),
+        charity_project_id: int,
+        obj_in: CharityProjectUpdate,
+        session: AsyncSession = Depends(get_async_session),
 ):
-    charity_project = await check_charity_project_exists(charity_project_id, session)
+    charity_project = await check_charity_project_exists(
+        charity_project_id, session
+    )
     check_fully_invested(charity_project)
     await check_name_duplicate(obj_in.name, session)
     if obj_in.full_amount is not None:
@@ -86,10 +92,14 @@ async def partially_update_charity_project(
     dependencies=[Depends(current_superuser)],
 )
 async def remove_charity_project(
-    charity_project_id: int,
-    session: AsyncSession = Depends(get_async_session),
+        charity_project_id: int,
+        session: AsyncSession = Depends(get_async_session),
 ):
-    charity_project = await check_charity_project_exists(charity_project_id, session)
+    charity_project = await check_charity_project_exists(
+        charity_project_id, session
+    )
     check_not_invested(charity_project)
-    charity_project = await charity_project_crud.remove(charity_project, session)
+    charity_project = await charity_project_crud.remove(
+        charity_project, session
+    )
     return charity_project

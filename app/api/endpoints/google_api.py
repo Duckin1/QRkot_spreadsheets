@@ -1,7 +1,7 @@
-import requests
 from aiogoogle import Aiogoogle
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import ValidationError
 
 
 from app.core.db import get_async_session
@@ -32,8 +32,6 @@ async def get_report(
     await set_user_permissions(spreadsheet_id, wrapper_services)
     try:
         await spreadsheets_update_value(spreadsheet_id, projects, wrapper_services)
-    except TypeError:
-        raise TypeError("Предоставлены неправильные данные аккаунта")
-    except requests.ConnectionError:
-        raise requests.ConnectionError("Не правильный запрос")
+    except ValidationError as error:
+        raise HTTPException(500, error)
     return {"doc": spreadsheet_url}

@@ -50,10 +50,9 @@ source venv/Scripts/activate - для Windows
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
-Создайте базу с помощью команд:
+Выполните миграции:
 ```commandline
-alembic init alembic
-alembic revision --autogenerate -m "First migration"
+alembic upgrade head
 ```
 Запустите проект:
 ```commandline
@@ -95,7 +94,7 @@ ___
 ___
 
 ### Документация
-Подробная документация к API проекта находится по адресу `http://127.0.0.1:8000/docs` или `http://127.0.0.1:8000/redoc`
+Подробная документация к API проекта находится по [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) или [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 ___
 ### Автор
-Миннибаев Алмаз https://github.com/Duckin1
+[Миннибаев Алмаз](https://github.com/Duckin1)
