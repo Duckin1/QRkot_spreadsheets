@@ -23,24 +23,22 @@ python -m venv venv
 ```
 В корневой директории создайте файл `.env` следующего содержания:
 ```commandline
-email= email для google cloud api
-app_title=Фонд поддержки котиков QRKot
-APP_DESCRIPTION=Помогаем котикам
-database_url=sqlite+aiosqlite:///./fastapi.db - путь подключения к базе
-secret=Ваш секретный ключ
+APP_TITLE=App QRKot
+APP_DESCRIPTION=**Donation collection service to support kitties.**
+DATABASE_URL=sqlite+aiosqlite:///./fastapi.db 
+SECRET=NqyCP8-cGyGat-uJOt2o
+TYPE=service_account
+PROJECT_ID="opportune-lore-369911"
+PRIVATE_KEY_ID="1b30aa142b6ef92c824edcf6536e81e8092daaa5"
+PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvAIT+YUw==\n-----END PRIVATE KEY-----\n"
+CLIENT_EMAIL="service-account@opportune-lore-369911.iam.gserviceaccount.com"
+CLIENT_ID="112473947934508090513"
+AUTH_URI="https://accounts.google.com/o/oauth2/auth"
+TOKEN_URI="https://oauth2.googleapis.com/token"
+AUTH_PROVIDER_X509_CERT_URL="https://www.googleapis.com/oauth2/v1/certs"
+CLIENT_X509_CERT_URL="https://www.googleapis.com/robot/v1/metadata/x509/service-account%40opportune-lore-369911.iam.gserviceaccount.com"
+EMAIL=email@gmail.com
 
-Данные с JSON google cloud api
-type =
-project_id=
-private_key_id=
-private_key=
-client_email=
-client_id=
-auth_uri=
-token_uri=
-auth_provider_x509_cert_url=
-client_x509_cert_url=
-universe_domain=
 ```
 Активируйте виртуальное окружение
 ```
