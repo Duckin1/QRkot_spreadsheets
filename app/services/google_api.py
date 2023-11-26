@@ -15,7 +15,7 @@ def get_now_time():
 
 
 HEADER = [
-    [f"Отчет от {get_now_time()}"],
+    [f"Отчет от"],
     ["Топ Проектов ао скорости закрытия"],
     ["Название проекта", "Время сбора", "Описание"],
 ]
@@ -39,25 +39,6 @@ SPREADSHEET_BODY = dict(
         )
     )]
 )
-
-
-def check_table_size(table_values):
-    for table_value in table_values:
-        # Проверяем количество рядов в таблице
-        if len(table_value) > settings.table_rows:
-            raise ValidationError(
-                f'Ошибка: Превышено ограничение по количеству рядов в таблице.'
-                f' Лимит: {settings.table_rows}.'
-                f' Пожалуйста, уменьшите количество рядов в таблице.'
-            )
-        for value in table_value:
-            # Проверяем количество столбцов в таблице
-            if len(value) > settings.table_columns:
-                raise ValidationError(
-                    f'Ошибка: Превышено ограничение по количеству столбцов в таблице.'
-                    f' Лимит: {settings.table_columns}.'
-                    f' Пожалуйста, уменьшите количество столбцов в таблице.'
-                )
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle):
@@ -100,8 +81,10 @@ async def spreadsheets_update_value(
     charity_projects = sorted(
         charity_projects, key=lambda timedelta: timedelta[1] - timedelta[2]
     )
+    header = deepcopy(HEADER)
+    header[0].append(get_now_time())
     table_values = [
-        deepcopy(HEADER),
+        *header,
         *[list(map(str, [
             str(charity_project["name"]),
             str(charity_project["close_date"] -
@@ -110,15 +93,27 @@ async def spreadsheets_update_value(
         ]
         )) for charity_project in charity_projects],
     ]
-    check_table_size(table_values)
     num_rows = len(table_values)
-    num_columns = len(table_values[0]) if table_values else 0
-    range_str = f'R1C1:R{num_rows}C{num_columns}'
+    num_columns = max([len(table_value) for table_value in table_values])
+    for table_value in table_values:
+        # Проверяем количество рядов в таблице
+        if len(table_value) > settings.table_rows:
+            raise ValidationError(
+                f'Ошибка: Превышено ограничение по количеству рядов в таблице.'
+                f' Лимит: {num_rows}.'
+            )
+        for value in table_value:
+            # Проверяем количество столбцов в таблице
+            if len(value) > settings.table_columns:
+                raise ValidationError(
+                    f'Ошибка: Превышено ограничение по количеству столбцов в таблице.'
+                    f' Лимит: {num_columns}.'
+                )
     update_body = {"majorDimension": "ROWS", "values": table_values}
     return await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range=range_str,
+            range=f'R1C1:R{num_rows}C{num_columns}',
             valueInputOption="USER_ENTERED",
             json=update_body,
         )
