@@ -94,21 +94,19 @@ async def spreadsheets_update_value(
         )) for charity_project in charity_projects],
     ]
     num_rows = len(table_values)
-    num_columns = max([len(table_value) for table_value in table_values])
-    for table_value in table_values:
-        # Проверяем количество рядов в таблице
-        if len(table_value) > settings.table_rows:
-            raise ValidationError(
-                f'Ошибка: Превышено ограничение по количеству рядов в таблице.'
-                f' Лимит: {num_rows}.'
-            )
-        for value in table_value:
-            # Проверяем количество столбцов в таблице
-            if len(value) > settings.table_columns:
-                raise ValidationError(
-                    f'Ошибка: Превышено ограничение по количеству столбцов в таблице.'
-                    f' Лимит: {num_columns}.'
-                )
+    num_columns = max(map(len, table_values))
+    # Проверяем количество рядов в таблице
+    if len(table_value) > settings.table_rows:
+        raise ValidationError(
+            f'Ошибка: Превышено ограничение по количеству рядов в таблице.'
+            f' Максимальное кол-во {settings.table_rows} у вас {num_rows}.'
+        )
+    # Проверяем количество столбцов в таблице
+    if len(value) > settings.table_columns:
+        raise ValidationError(
+            f'Ошибка: Превышено ограничение по количеству столбцов в таблице.'
+            f' Максимальное кол-во {settings.table_columns} у вас {num_columns}.'
+        )
     update_body = {"majorDimension": "ROWS", "values": table_values}
     return await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
