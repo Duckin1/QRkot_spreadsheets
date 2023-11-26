@@ -19,6 +19,6 @@ def invest_to_charity_project(
             if obj.invested_amount == obj.full_amount:
                 obj.fully_invested, obj.close_date = True, dt.now()
         modified.append(target)
-        if target.fully_invested:
+        if source.fully_invested:
             break
     return modified

@@ -51,7 +51,7 @@ async def create_charity_project(
 ) -> Donation:
     new_donation = await donation_crud.create(
         donation, session,
-        user, is_not_committed=False
+        user, do_commit=False
     )
     charity_projects = await charity_project_crud.get_not_fully_invested(
         session

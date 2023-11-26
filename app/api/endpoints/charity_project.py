@@ -36,7 +36,7 @@ async def create_charity_project(
     """Только для авторизованных пользователей"""
     await check_name_duplicate(project.name, session)
     new_project = await charity_project_crud.create(
-        project, session, is_not_committed=False
+        project, session, do_commit=False
     )
     donats = await donation_crud.get_not_fully_invested(session)
     donats = invest_to_charity_project(new_project, donats)

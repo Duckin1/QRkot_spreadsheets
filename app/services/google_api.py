@@ -45,14 +45,14 @@ def check_table_size(table_values):
     for table_value in table_values:
         if len(table_value) > settings.table_rows:
             raise ValidationError(
-                f'Невозможно создать таблицу размера'
-                f' {settings.table_rows} > 3'
+                f'Ошибка: Превышено ограничение по количеству рядов в таблице.'
+                f' Лимит: {settings.table_rows}'
             )
         for value in table_value:
             if len(value) > settings.table_columns:
                 raise ValidationError(
-                    f'Невозможно создать таблицу размера '
-                    f'{settings.table_columns} > 100'
+                    f'Ошибка: Превышено ограничение по количеству столбцов в таблице.'
+                    f' Лимит: {settings.table_columns}'
                 )
 
 
@@ -97,7 +97,8 @@ async def spreadsheets_update_value(
         charity_projects, key=lambda timedelta: timedelta[1] - timedelta[2]
     )
     table_values = [
-        *HEADER[0].append(get_now_time()),
+        [get_now_time()],
+        *HEADER,
         *[list(map(str, [
             str(charity_project["name"]),
             str(charity_project["close_date"] -
@@ -111,7 +112,7 @@ async def spreadsheets_update_value(
     return await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range=f'R1C1:R{settings.table_rows}C{settings.table_columns}',
+            range=f'R1C1:R30C5',
             valueInputOption="USER_ENTERED",
             json=update_body,
         )
