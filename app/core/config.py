@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     auth_provider_x509_cert_url: Optional[str] = None
     client_x509_cert_url: Optional[str] = None
     email: Optional[str] = None
-    table_rows: int = 3
-    table_columns: int = 100
+    table_rows: int = 100
+    table_columns: int = 3
 
     class Config:
         env_file = ".env"
