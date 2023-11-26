@@ -96,13 +96,13 @@ async def spreadsheets_update_value(
     num_rows = len(table_values)
     num_columns = max(map(len, table_values))
     # Проверяем количество рядов в таблице
-    if len(table_value) > settings.table_rows:
+    if num_rows > settings.table_rows:
         raise ValidationError(
             f'Ошибка: Превышено ограничение по количеству рядов в таблице.'
             f' Максимальное кол-во {settings.table_rows} у вас {num_rows}.'
         )
     # Проверяем количество столбцов в таблице
-    if len(value) > settings.table_columns:
+    if num_columns > settings.table_columns:
         raise ValidationError(
             f'Ошибка: Превышено ограничение по количеству столбцов в таблице.'
             f' Максимальное кол-во {settings.table_columns} у вас {num_columns}.'
